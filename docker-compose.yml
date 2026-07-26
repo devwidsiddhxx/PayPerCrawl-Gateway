@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  demo-website:
+    build: 
+      context: .
+      dockerfile: demo-website/Dockerfile
+    ports:
+      - "8081:8081"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: pay-per-crawl-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - BIND_ADDR=0.0.0.0:8080
+      - TARGET_ORIGIN=http://demo-website:8081
+    depends_on:
+      - demo-website
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus

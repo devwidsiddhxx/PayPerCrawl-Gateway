@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "pay-per-crawl-gateway",
+    "demo-website"
+]
+resolver = "2"
