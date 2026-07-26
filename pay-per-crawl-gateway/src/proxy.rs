@@ -6,6 +6,7 @@ use axum::{
 };
 use reqwest::Method;
 use std::sync::Arc;
+use http_body_util::BodyExt;
 
 #[derive(Clone)]
 pub struct ProxyState {
@@ -33,8 +34,9 @@ pub async fn reverse_proxy_handler(
     headers.remove(axum::http::header::HOST);
 
     // Read body
-    let body_bytes = axum::body::to_bytes(req.into_body(), usize::MAX).await
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+    let body_bytes = req.into_body().collect().await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?
+        .to_bytes();
 
     let reqwest_method = Method::from_bytes(method.as_str().as_bytes()).unwrap();
 
